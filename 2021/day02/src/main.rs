@@ -1,22 +1,27 @@
 use std::fs;
 
 struct Position {
-    horizontal: i32,
+    aim: i32,
     depth: i32,
+    horizontal: i32,
 }
 
 impl Position {
     fn navigate(&mut self, command: Option<&str>, value: i32) {
         match command {
-            Some("forward") => self.horizontal += value,
-            Some("down") => self.depth += value,
-            Some("up") => self.depth -= value,
+            Some("forward") => {
+                self.horizontal += value;
+                self.depth += self.aim * value;
+            },
+            Some("down") => self.aim += value,
+            Some("up") => self.aim -= value,
             _ => {}
         }
     }
 
     fn new() -> Self {
         Position {
+            aim: 0,
             horizontal: 0,
             depth: 0
         }
@@ -41,7 +46,7 @@ fn navigate(instructions: &str) -> Position {
         let command = iter.next();
         let value: i32 = match iter.next() {
             Some(x) => x.parse().unwrap(),
-            _ => { panic!("Unable to parse instruction value") }
+            _ => { panic!("Unable to parse instruction value: {}", line) }
         };
         position.navigate(command, value);
     }
@@ -63,7 +68,7 @@ down 8
 forward 2";
         let position = navigate(instructions);
         assert_eq!(15, position.horizontal);
-        assert_eq!(10, position.depth);
-        assert_eq!(150, position.horizontal * position.depth);
+        assert_eq!(60, position.depth);
+        assert_eq!(900, position.horizontal * position.depth);
     }
 }
